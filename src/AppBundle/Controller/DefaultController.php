@@ -2,20 +2,33 @@
 
 namespace AppBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use AppBundle\AppBundle;
+use AppBundle\Entity\Shortener;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
-    /**
-     * @Route("/", name="homepage")
-     */
+
     public function indexAction(Request $request)
     {
-        // replace this example code with whatever you need
-        return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+
+        $url = new Shortener();
+        $em = $this->getDoctrine()->getManager();
+
+        $form = $this->createFormBuilder($url)
+            ->add('originUrl', TextType::class)
+            ->add('shortUrl', TextType::class,[
+                'required' => false
+            ])
+            ->add('save', SubmitType::class, ['label' => 'Generate short link'])
+            ->getForm();
+        $form->handleRequest($request);
+
+        return $this->render('@App/homepage/index.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }
