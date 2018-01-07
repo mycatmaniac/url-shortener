@@ -19,10 +19,12 @@
             {{ form_widget(form) }}
             {{ form_end(form) }}
 
-            <br>
-            {{ url('homepage') }}{{ new_url }}
-            <br>
-            Amount of visits: {{ amount }}
+            {% if new_url is defined %}
+                <br>
+                {{ url('homepage') }}{{ new_url }}
+                <br>
+                Amount of visits: {{ amount }}
+            {% endif %}
 
         </div>
     </div>
