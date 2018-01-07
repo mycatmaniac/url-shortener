@@ -62,11 +62,18 @@ class DefaultController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $url = $em->getRepository(Shortener::class)->findOneBy(['shortUrl' => $short_url ]);
-        $amount = $url->getAmount();
-        $url->setAmount($amount + 1);
 
-        $em->persist($url);
-        $em->flush();
+        if ($url){
+
+            $amount = $url->getAmount();
+            $url->setAmount($amount + 1);
+
+            $em->persist($url);
+            $em->flush();
+
+        } else {
+            return $this->render('@App/show/index.html.twig');
+        }
 
         return $this->redirect($url->getOriginUrl());
     }
