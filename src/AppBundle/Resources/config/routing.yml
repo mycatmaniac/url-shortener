@@ -2,3 +2,10 @@ homepage:
   path: /
   defaults:
     _controller: AppBundle:Default:index
+
+show:
+  path: /{short_url}
+  defaults:
+    _controller: AppBundle:Default:show
+  requirements:
+          methods: GET

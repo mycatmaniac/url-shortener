@@ -4,7 +4,6 @@ namespace AppBundle\Controller;
 
 use AppBundle\AppBundle;
 use AppBundle\Entity\Shortener;
-use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -47,6 +46,7 @@ class DefaultController extends Controller
             return $this->render('@App/homepage/index.html.twig',[
                 'form' => $form->createView(),
                 'new_url' => $url->getShortUrl(),
+                'amount' => $url->getAmount(),
             ]);
 
         }
@@ -54,5 +54,20 @@ class DefaultController extends Controller
         return $this->render('@App/homepage/index.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    public function showAction($short_url)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+
+        $url = $em->getRepository(Shortener::class)->findOneBy(['shortUrl' => $short_url ]);
+        $amount = $url->getAmount();
+        $url->setAmount($amount + 1);
+
+        $em->persist($url);
+        $em->flush();
+
+        return $this->redirect($url->getOriginUrl());
     }
 }

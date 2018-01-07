@@ -48,7 +48,7 @@ class Shortener
      *
      * @ORM\Column(name="amount", type="integer", nullable=true)
      */
-    private $amount;
+    private $amount = 0;
 
 
     /**
@@ -119,7 +119,6 @@ class Shortener
     public function setAmount($amount)
     {
         $this->amount = $amount;
-
         return $this;
     }
 
