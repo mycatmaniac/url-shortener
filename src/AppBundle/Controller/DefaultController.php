@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\FormError;
 
 
 class DefaultController extends Controller
@@ -33,21 +34,35 @@ class DefaultController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $em->persist($url);
-            $em->flush();
 
-            if ($url->getShortUrl() == null) {
-                $url->setShortUrl(base64_encode($url->getId()));
+            // get response code
+            $ch = curl_init($data->getOriginUrl());
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+            curl_exec($ch);
+            $retcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($retcode == 200) {
+
+                $em->persist($url);
+                $em->flush();
+
+                if ($url->getShortUrl() == null) {
+                    $url->setShortUrl(base64_encode($url->getId()));
+                }
+
+                $em->persist($url);
+                $em->flush();
+
+                return $this->render('@App/homepage/index.html.twig', [
+                    'form' => $form->createView(),
+                    'new_url' => $url->getShortUrl(),
+                    'amount' => $url->getAmount(),
+                ]);
+
+            } else {
+                $form->addError(new FormError('Link broken, check available'));
             }
-
-            $em->persist($url);
-            $em->flush();
-
-            return $this->render('@App/homepage/index.html.twig',[
-                'form' => $form->createView(),
-                'new_url' => $url->getShortUrl(),
-                'amount' => $url->getAmount(),
-            ]);
 
         }
 
