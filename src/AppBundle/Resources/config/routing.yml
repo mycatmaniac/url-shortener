@@ -9,3 +9,16 @@ show:
     _controller: AppBundle:Default:show
   requirements:
           methods: GET
+
+api:
+  path: /api/{short_url}
+  defaults:
+    _controller: AppBundle:Default:api
+  requirements:
+          methods: GET
+api_view:
+  path: /api/{short_url}/view
+  defaults:
+    _controller: AppBundle:Default:apiView
+  requirements:
+          methods: GET

@@ -4,12 +4,12 @@ namespace AppBundle\Controller;
 
 use AppBundle\AppBundle;
 use AppBundle\Entity\Shortener;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\FormError;
-
 
 class DefaultController extends Controller
 {
@@ -19,7 +19,6 @@ class DefaultController extends Controller
 
         $url = new Shortener();
         $em = $this->getDoctrine()->getManager();
-
         $form = $this->createFormBuilder($url)
             ->add('originUrl', TextType::class, [
                 'label' => 'Paste link'
@@ -106,6 +105,22 @@ class DefaultController extends Controller
         }
 
         return $this->redirect($url->getOriginUrl());
+    }
+    public function apiAction($short_url)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+        $url = $em->getRepository(Shortener::class)->findOneBy(['shortUrl' => $short_url ]);
+
+        $serializer = $this->container->get('jms_serializer');
+        $reports = $serializer->serialize($url, 'json');
+        return new Response($reports);
+        
+//        dump(composer require jms/serializer-bundle(['nnamne'=>'name']));
+
+
+//        return $this->render('@App/show/index.html.twig');
+
     }
 
 
