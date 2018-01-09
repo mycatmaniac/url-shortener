@@ -24,6 +24,10 @@ class DefaultController extends Controller
             ->add('originUrl', TextType::class, [
                 'label' => 'Paste link'
             ])
+            ->add('shortUrl', TextType::class, [
+                'label' => 'Desired short url',
+                'required' => false
+            ])
             ->add('save', SubmitType::class, [
                 'label' => 'Generate short link'
             ])
@@ -32,6 +36,7 @@ class DefaultController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $data = $form->getData();
 
 
@@ -42,30 +47,35 @@ class DefaultController extends Controller
             $retcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-            if ($retcode == 200) {
+            // check response code
+            if ($retcode != 200) $form->addError(new FormError('Link broken, check available'));
 
-                $em->persist($url);
-                $em->flush();
+            //check short url is exist
+            $exist_short_url = $em->getRepository(Shortener::class)->findOneBy([
+                'shortUrl' => $data->getShortUrl(),
+            ]);
 
-                if ($url->getShortUrl() == null) {
-                    $url->setShortUrl(base64_encode($url->getId()));
-                }
+            // persist to get an id
+            $em->persist($url);
+            $em->flush();
 
-                $em->persist($url);
-                $em->flush();
-
-                return $this->render('@App/homepage/index.html.twig', [
-                    'form' => $form->createView(),
-                    'new_url' => $url->getShortUrl(),
-                    'amount' => $url->getAmount(),
-                ]);
-
+            // set short url
+            if ($exist_short_url) {
+                $url->setShortUrl(base64_encode($url->getId()));
             } else {
-                $form->addError(new FormError('Link broken, check available'));
+                $url->setShortUrl($data->getShortUrl());
             }
 
-        }
+            $em->persist($url);
+            $em->flush();
 
+            return $this->render('@App/homepage/index.html.twig', [
+                'form' => $form->createView(),
+                'new_url' => $url->getShortUrl(),
+                'amount' => $url->getAmount(),
+            ]);
+
+        }
         return $this->render('@App/homepage/index.html.twig', [
             'form' => $form->createView(),
         ]);
@@ -79,13 +89,11 @@ class DefaultController extends Controller
         $url = $em->getRepository(Shortener::class)->findOneBy(['shortUrl' => $short_url ]);
 
         if ($url){
-
             $amount = $url->getAmount();
             $url->setAmount($amount + 1);
 
             $em->persist($url);
             $em->flush();
-
         } else {
             return $this->render('@App/show/index.html.twig');
         }
