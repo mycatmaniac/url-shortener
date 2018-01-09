@@ -106,6 +106,7 @@ class DefaultController extends Controller
 
         return $this->redirect($url->getOriginUrl());
     }
+
     public function apiAction($short_url)
     {
 
@@ -115,13 +116,23 @@ class DefaultController extends Controller
         $serializer = $this->container->get('jms_serializer');
         $reports = $serializer->serialize($url, 'json');
         return new Response($reports);
-        
-//        dump(composer require jms/serializer-bundle(['nnamne'=>'name']));
-
-
-//        return $this->render('@App/show/index.html.twig');
 
     }
 
+    public function apiViewAction($short_url)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+        $url = $em->getRepository(Shortener::class)->findOneBy(['shortUrl' => $short_url ]);
+
+        if ($url == null) return $this->render('@App/show/index.html.twig');
+
+        return $this->render('@App/api/index.html.twig', [
+            'short_url' => $url->getShortUrl(),
+            'origin_url' => $url->getOriginUrl(),
+            'amount' => $url->getAmount(),
+            'id' => $url->getId(),
+        ]);
+    }
 
 }

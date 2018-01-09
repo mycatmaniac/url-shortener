@@ -3,18 +3,15 @@
 {% block body %}
     <div id="wrapper">
         <div id="container">
-            <h1>Welcome to shortener</h1>
+            <h1>Welcome to link #{{ id }}</h1>
 
-            {{ form_start(form) }}
-            {{ form_widget(form) }}
-            {{ form_end(form) }}
+            <br>
+            Origin url: {{ origin_url }}
+            <br>
+            Short url: {{ url('homepage') }}{{ short_url }}
+            <br>
+            Amount of visits: {{ amount }}
 
-            {% if new_url is defined %}
-                <br>
-                {{ url('homepage') }}{{ new_url }}
-                <br>
-                Amount of visits: {{ amount }}
-            {% endif %}
 
         </div>
     </div>
