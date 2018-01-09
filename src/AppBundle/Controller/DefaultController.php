@@ -29,7 +29,10 @@ class DefaultController extends Controller
                 'required' => false
             ])
             ->add('save', SubmitType::class, [
-                'label' => 'Generate short link'
+                'label' => 'Generate short link',
+                'attr' => [
+                    'class' => 'btn btn-primary',
+                ]
             ])
             ->getForm();
 
@@ -55,13 +58,17 @@ class DefaultController extends Controller
                 'shortUrl' => $data->getShortUrl(),
             ]);
 
-            // persist to get an id
-            $em->persist($url);
-            $em->flush();
-
             // set short url
-            if ($exist_short_url) {
+            if ($exist_short_url != null) {
+
+                $url->setShortUrl(null);
+
+                // persist to get an id
+                $em->persist($url);
+                $em->flush();
+
                 $url->setShortUrl(base64_encode($url->getId()));
+
             } else {
                 $url->setShortUrl($data->getShortUrl());
             }
@@ -100,4 +107,6 @@ class DefaultController extends Controller
 
         return $this->redirect($url->getOriginUrl());
     }
+
+
 }
