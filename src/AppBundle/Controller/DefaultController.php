@@ -20,19 +20,11 @@ class DefaultController extends Controller
         $url = new Shortener();
         $em = $this->getDoctrine()->getManager();
         $form = $this->createFormBuilder($url)
-            ->add('originUrl', TextType::class, [
-                'label' => 'Paste link'
-            ])
+            ->add('originUrl', TextType::class)
             ->add('shortUrl', TextType::class, [
-                'label' => 'Desired short url',
-                'required' => false
+                'required' => false,
             ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Generate short link',
-                'attr' => [
-                    'class' => 'btn btn-primary',
-                ]
-            ])
+            ->add('save', SubmitType::class)
             ->getForm();
 
         $form->handleRequest($request);
