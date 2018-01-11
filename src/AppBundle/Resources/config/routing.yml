@@ -11,7 +11,7 @@ show:
           methods: GET
 
 api:
-  path: /api/{short_url}
+  path: /api/get/{short_url}
   defaults:
     _controller: AppBundle:Default:api
   requirements:

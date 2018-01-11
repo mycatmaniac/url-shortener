@@ -102,6 +102,19 @@ class DefaultController extends Controller
         return new Response($reports);
 
     }
+    public function apiCreateAction($short_url)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+
+
+        $url = $em->getRepository(Shortener::class)->findOneBy(['shortUrl' => $short_url ]);
+
+        $serializer = $this->container->get('jms_serializer');
+        $reports = $serializer->serialize($url, 'json');
+        return new Response($reports);
+
+    }
 
     public function apiViewAction($short_url)
     {
