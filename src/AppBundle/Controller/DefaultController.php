@@ -76,14 +76,14 @@ class DefaultController extends Controller
 
         $url = $em->getRepository(Shortener::class)->findOneBy(['shortUrl' => $short_url ]);
 
-        if ($url){
+        if ($url == null){
+               return $this->render('@App/show/index.html.twig',[],new Response('', 404));
+        } else {
             $amount = $url->getAmount();
             $url->setAmount($amount + 1);
 
             $em->persist($url);
             $em->flush();
-        } else {
-            return $this->render('@App/show/index.html.twig');
         }
 
         return $this->redirect($url->getOriginUrl());
