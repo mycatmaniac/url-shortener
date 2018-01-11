@@ -42,8 +42,9 @@ class DefaultController extends Controller
             if ($retcode != 200) $form->addError(new FormError('Link broken, check available'));
 
             // set short url
-            if ($exist_short_url != null) {
-
+            if ($exist_short_url == null) {
+                $url->setShortUrl($data->getShortUrl());
+            } else {
                 $url->setShortUrl(null);
 
                 // persist to get an id
@@ -51,9 +52,6 @@ class DefaultController extends Controller
                 $em->flush();
 
                 $url->setShortUrl(base64_encode($url->getId()));
-
-            } else {
-                $url->setShortUrl($data->getShortUrl());
             }
 
             $em->persist($url);
