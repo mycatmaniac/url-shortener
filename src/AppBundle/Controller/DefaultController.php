@@ -34,9 +34,9 @@ class DefaultController extends Controller
 
             $data = $form->getData();
 
-            $shortener_service = new ShortenerServices($data->getOriginUrl(), $data->getShortUrl(), $em);
-            $retcode = $shortener_service->checkResponse();
-            $exist_short_url = $shortener_service->checkExistUrl();
+            $shortener_service = new ShortenerServices();
+            $retcode = $shortener_service->checkResponse($data->getOriginUrl());
+            $exist_short_url = $shortener_service->checkExistUrl($data->getShortUrl(), $em);
 
             // check response code
             if ($retcode != 200) $form->addError(new FormError('Link broken, check available'));
@@ -102,13 +102,41 @@ class DefaultController extends Controller
         return new Response($reports);
 
     }
-    public function apiCreateAction($short_url)
+    public function apiCreateAction(Request $request)
     {
+
+        // get GET parameters
+        $origin_url = $request->query->get('originUrl');
+        $short_url = $request->query->get('shortUrl');
+
+        if ($origin_url == null) return 'Set GET parameters "originUrl" and "shortUrl" (shortUrl optional)';
 
         $em = $this->getDoctrine()->getManager();
 
+        $shortener_service = new ShortenerServices();
+        $retcode = $shortener_service->checkResponse($origin_url);
+        ($short_url == null )? $exist_short_url = null: $exist_short_url = $shortener_service->checkExistUrl($short_url, $em);
 
-        $url = $em->getRepository(Shortener::class)->findOneBy(['shortUrl' => $short_url ]);
+        if ($retcode != 200) return 'Link broken, check available';
+
+        $url = new Shortener();
+        $url->setOriginUrl($origin_url);
+        $url->setAmount(0);
+
+
+        if ($exist_short_url == null) {
+            // persist to get an id
+            $em->persist($url);
+            $em->flush();
+
+            $url->setShortUrl(base64_encode($url->getId()));
+        } else {
+            $url->setShortUrl($short_url);
+        }
+
+
+        $em->persist($url);
+        $em->flush();
 
         $serializer = $this->container->get('jms_serializer');
         $reports = $serializer->serialize($url, 'json');

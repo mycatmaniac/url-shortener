@@ -8,27 +8,16 @@ use Doctrine\ORM\EntityManager;
 class ShortenerServices
 {
 
-    protected $origin_url;
-    protected $short_url;
-    protected $em;
-    protected $obj;
-    protected $form;
-
-
-    public function __construct($origin_url, $short_url, EntityManager $entityManager)
+    public function __construct()
     {
-        $this->origin_url = $origin_url;
-        $this->short_url = $short_url;
-        $this->em = $entityManager;
-//        $this->obj = $obj;
-//        $this->form = $form;
+
     }
 
 
-    public function checkResponse()
+    public function checkResponse($origin_url)
     {
         // get response code
-        $ch = curl_init($this->origin_url);
+        $ch = curl_init($origin_url);
         curl_setopt($ch, CURLOPT_NOBODY, true);
         curl_exec($ch);
         $retcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -37,11 +26,11 @@ class ShortenerServices
         return $retcode;
     }
 
-    public function checkExistUrl()
+    public function checkExistUrl($short_url, EntityManager $entityManager)
     {
         //check short url is exist
-       return $exist_short_url = $this->em->getRepository(Shortener::class)->findOneBy([
-            'shortUrl' => $this->short_url,
+       return $exist_short_url = $entityManager->getRepository(Shortener::class)->findOneBy([
+            'shortUrl' => $short_url,
         ]);
     }
 

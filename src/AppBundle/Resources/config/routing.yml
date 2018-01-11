@@ -16,6 +16,14 @@ api:
     _controller: AppBundle:Default:api
   requirements:
           methods: GET
+
+api_create:
+  path: /api/create/
+  defaults:
+    _controller: AppBundle:Default:apiCreate
+  requirements:
+          methods: GET
+
 api_view:
   path: /api/{short_url}/view
   defaults:
