@@ -1,10 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block stylesheets %}
-    {% stylesheets
-    '@AppBundle/Resources/public/styles/bootstrap.min.css'
-    '@AppBundle/Resources/public/styles/style.css'
-    filter='cssrewrite' %}
+    {% stylesheets '@AppBundle/Resources/public/styles/bootstrap.min.css' filter='cssrewrite' %}
     <link rel="stylesheet" href="{{ asset_url }}" />
     {% endstylesheets %}
 {% endblock %}
