@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\AppBundle;
 use AppBundle\Entity\Shortener;
+use AppBundle\Services\ShortenerServices;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -33,21 +34,12 @@ class DefaultController extends Controller
 
             $data = $form->getData();
 
-
-            // get response code
-            $ch = curl_init($data->getOriginUrl());
-            curl_setopt($ch, CURLOPT_NOBODY, true);
-            curl_exec($ch);
-            $retcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
+            $shortener_service = new ShortenerServices($data->getOriginUrl(), $data->getShortUrl(), $em);
+            $retcode = $shortener_service->checkResponse();
+            $exist_short_url = $shortener_service->checkExistUrl();
 
             // check response code
             if ($retcode != 200) $form->addError(new FormError('Link broken, check available'));
-
-            //check short url is exist
-            $exist_short_url = $em->getRepository(Shortener::class)->findOneBy([
-                'shortUrl' => $data->getShortUrl(),
-            ]);
 
             // set short url
             if ($exist_short_url != null) {
