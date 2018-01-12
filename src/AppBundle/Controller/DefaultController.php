@@ -38,9 +38,6 @@ class DefaultController extends Controller
             $retcode = $shortener_service->checkResponse($data->getOriginUrl());
             $exist_short_url = $shortener_service->checkExistUrl($data->getShortUrl(), $em);
 
-            dump($data->getOriginUrl());
-            dump($retcode);
-
             // check response code
             if (in_array($retcode, [404,0])) {
                 $form->addError(new FormError('Link broken, check available.'));
