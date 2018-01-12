@@ -38,32 +38,38 @@ class DefaultController extends Controller
             $retcode = $shortener_service->checkResponse($data->getOriginUrl());
             $exist_short_url = $shortener_service->checkExistUrl($data->getShortUrl(), $em);
 
+            dump($data->getOriginUrl());
+            dump($retcode);
+
             // check response code
-            if ($retcode != 200) $form->addError(new FormError('Link broken, check available'));
-
-            // set short url
-            if ($exist_short_url == null) {
-                $url->setShortUrl($data->getShortUrl());
+            if (in_array($retcode, [404,0])) {
+                $form->addError(new FormError('Link broken, check available.'));
             } else {
-                $url->setShortUrl(null);
 
-                // persist to get an id
+                // set short url
+                if ($exist_short_url == null) {
+                    $url->setShortUrl($data->getShortUrl());
+                } else {
+                    $url->setShortUrl(null);
+
+                    // persist to get an id
+                    $em->persist($url);
+                    $em->flush();
+
+                    $url->setShortUrl(base64_encode($url->getId()));
+                }
+
                 $em->persist($url);
                 $em->flush();
 
-                $url->setShortUrl(base64_encode($url->getId()));
+                return $this->render('@App/homepage/index.html.twig', [
+                    'form' => $form->createView(),
+                    'new_url' => $url->getShortUrl(),
+                    'amount' => $url->getAmount(),
+                ]);
             }
-
-            $em->persist($url);
-            $em->flush();
-
-            return $this->render('@App/homepage/index.html.twig', [
-                'form' => $form->createView(),
-                'new_url' => $url->getShortUrl(),
-                'amount' => $url->getAmount(),
-            ]);
-
         }
+
         return $this->render('@App/homepage/index.html.twig', [
             'form' => $form->createView(),
         ]);
@@ -115,7 +121,7 @@ class DefaultController extends Controller
         $retcode = $shortener_service->checkResponse($origin_url);
         ($short_url == null )? $exist_short_url = null: $exist_short_url = $shortener_service->checkExistUrl($short_url, $em);
 
-        if ($retcode != 200) return 'Link broken, check available';
+        if (in_array($retcode, [404,0])) return 'Link broken, check available';
 
         $url = new Shortener();
         $url->setOriginUrl($origin_url);
